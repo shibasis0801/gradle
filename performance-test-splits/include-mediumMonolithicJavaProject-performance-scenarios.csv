@@ -1,0 +1,2 @@
+org.gradle.performance.regression.inception.BuildSrcApiChangePerformanceTest;buildSrc abi change
+org.gradle.performance.regression.inception.BuildSrcApiChangePerformanceTest;buildSrc non-abi change

@@ -1,0 +1,2 @@
+org.gradle.performance.regression.corefeature.RichConsolePerformanceTest;cleanTest test with rich console
+org.gradle.performance.regression.corefeature.VerboseTestOutputPerformanceTest;cleanTest test with verbose test output

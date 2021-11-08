@@ -1,0 +1,2 @@
+org.gradle.performance.regression.corefeature.ParallelDownloadsPerformanceTest;resolves dependencies from external repository
+org.gradle.performance.regression.corefeature.ParallelDownloadsPerformanceTest;resolves dependencies from external repository (parallel)

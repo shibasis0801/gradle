@@ -1,0 +1,5 @@
+org.gradle.performance.regression.buildcache.TaskOutputCachingNativePerformanceTest;clean assemble with local cache (native project)
+org.gradle.performance.regression.nativeplatform.NativeBuildPerformanceTest;assemble with header file change
+org.gradle.performance.regression.nativeplatform.NativeBuildPerformanceTest;assemble with source file change
+org.gradle.performance.regression.nativeplatform.NativeBuildPerformanceTest;up-to-date assemble (native)
+org.gradle.performance.regression.nativeplatform.NativeCleanBuildPerformanceTest;clean assemble (native)

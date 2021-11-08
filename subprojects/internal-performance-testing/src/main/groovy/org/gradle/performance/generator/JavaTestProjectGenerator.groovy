@@ -47,7 +47,7 @@ enum JavaTestProjectGenerator {
         .assembleChangeFile()
         .testChangeFile(450, 2250, 45000).create()),
     LARGE_MONOLITHIC_GROOVY_PROJECT(new TestProjectGeneratorConfigurationBuilder("largeMonolithicGroovyProject", Language.GROOVY)
-        .withSourceFiles(50000)
+        .withSourceFiles(5)
         .withSubProjects(0)
         .withDaemonMemory('3g')
         .withCompilerMemory('6g')
@@ -93,8 +93,8 @@ enum JavaTestProjectGenerator {
         .assembleChangeFile(-1)
         .create()),
     MEDIUM_JAVA_MULTI_PROJECT(new TestProjectGeneratorConfigurationBuilder("mediumJavaMultiProject")
-        .withSourceFiles(100)
-        .withSubProjects(100)
+        .withSourceFiles(3)
+        .withSubProjects(3)
         .withDaemonMemory('512m')
         .withCompilerMemory('256m')
         .assembleChangeFile()
@@ -116,12 +116,12 @@ enum JavaTestProjectGenerator {
         .composite(true)
         .create()),
     MEDIUM_JAVA_MULTI_PROJECT_WITH_TEST_NG(new TestProjectGeneratorConfigurationBuilder("mediumJavaMultiProjectWithTestNG")
-        .withSourceFiles(100)
-        .withSubProjects(100)
+        .withSourceFiles(3)
+        .withSubProjects(3)
         .withDaemonMemory('512m')
         .withCompilerMemory('256m')
         .assembleChangeFile()
-        .testChangeFile(50, 250, 5000)
+        .testChangeFile(1, 1, 1)
         .withUseTestNG(true)
         .create()),
     SMALL_JAVA_MULTI_PROJECT(new TestProjectGeneratorConfigurationBuilder("smallJavaMultiProject")

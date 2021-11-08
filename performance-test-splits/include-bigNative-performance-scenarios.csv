@@ -1,0 +1,3 @@
+org.gradle.performance.regression.buildcache.TaskOutputCachingNativePerformanceTest;clean assemble with local cache (native project)
+org.gradle.performance.regression.corefeature.RichConsolePerformanceTest;clean assemble with rich console
+org.gradle.performance.regression.nativeplatform.NativeCleanBuildPerformanceTest;clean assemble (native)

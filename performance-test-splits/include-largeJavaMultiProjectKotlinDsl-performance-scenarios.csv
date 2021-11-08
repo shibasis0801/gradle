@@ -1,0 +1,2 @@
+org.gradle.performance.regression.java.JavaFirstUsePerformanceTest;clean checkout
+org.gradle.performance.regression.inception.BuildSrcApiChangePerformanceTest;buildSrc non-abi change

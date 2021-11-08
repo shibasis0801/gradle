@@ -1,0 +1,1 @@
+org.gradle.performance.regression.corefeature.RichConsolePerformanceTest;clean assemble with rich console

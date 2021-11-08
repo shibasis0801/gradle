@@ -1,0 +1,2 @@
+org.gradle.performance.regression.android.AndroidIncrementalExecutionPerformanceTest;abi change with configuration caching
+org.gradle.performance.regression.android.AndroidIncrementalExecutionPerformanceTest;non-abi change with configuration caching

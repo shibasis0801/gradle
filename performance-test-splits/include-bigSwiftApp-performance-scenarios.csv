@@ -1,0 +1,2 @@
+org.gradle.performance.regression.buildcache.TaskOutputCachingSwiftPerformanceTest;clean assemble with local cache (swift)
+org.gradle.performance.regression.nativeplatform.SwiftBuildPerformanceTest;up-to-date assemble (swift)

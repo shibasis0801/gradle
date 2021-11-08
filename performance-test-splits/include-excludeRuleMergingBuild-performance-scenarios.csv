@@ -1,0 +1,2 @@
+org.gradle.performance.regression.corefeature.LargeDependencyGraphPerformanceTest;resolve large dependency graph from file repo
+org.gradle.performance.regression.corefeature.LargeDependencyGraphPerformanceTest;resolve large dependency graph (parallel = true, locking = false)

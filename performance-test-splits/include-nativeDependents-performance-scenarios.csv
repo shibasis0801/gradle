@@ -1,0 +1,1 @@
+org.gradle.performance.regression.nativeplatform.NativeBuildDependentsPerformanceTest;run libA0:buildDependentsLibA0

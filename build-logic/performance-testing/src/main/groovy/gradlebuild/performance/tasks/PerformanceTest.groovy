@@ -128,6 +128,7 @@ abstract class PerformanceTest extends DistributionTest {
         getOutputs().upToDateWhen { !containsSpecialVersions() && !flakinessDetection }
 
         projectName.set(project.name)
+        outputs.upToDateWhen { false }
     }
 
     private boolean containsSpecialVersions() {
@@ -144,6 +145,7 @@ abstract class PerformanceTest extends DistributionTest {
     @Override
     @TaskAction
     void executeTests() {
+        println("Getting $path")
         performanceTestService.get()
         if (getScenarios() == null) {
             moveMethodFiltersToScenarios()
@@ -161,19 +163,19 @@ abstract class PerformanceTest extends DistributionTest {
             }
         } finally {
             generateResultsJson()
-            performanceReporter.report(
-                reportGeneratorClass.get(),
-                reportDir,
-                [resultsJson],
-                databaseParameters,
-                channel,
-                branchName,
-                commitId.get(),
-                classpath,
-                projectName.get(),
-                buildId,
-                false
-            )
+//            performanceReporter.report(
+//                reportGeneratorClass.get(),
+//                reportDir,
+//                [resultsJson],
+//                databaseParameters,
+//                channel,
+//                branchName,
+//                commitId.get(),
+//                classpath,
+//                projectName.get(),
+//                buildId,
+//                false
+//            )
         }
     }
 

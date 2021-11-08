@@ -1,0 +1,2 @@
+org.gradle.performance.regression.java.JavaConfigurationCachePerformanceTest;assemble loading configuration cache state with hot daemon
+org.gradle.performance.regression.java.JavaConfigurationCachePerformanceTest;assemble storing configuration cache state with hot daemon
