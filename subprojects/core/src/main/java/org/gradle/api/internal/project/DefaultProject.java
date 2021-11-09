@@ -142,6 +142,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonMap;
@@ -213,6 +214,8 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     private String description;
 
     private boolean preparedForRuleBasedPlugins;
+
+    public static List<Exception> exceptions = new CopyOnWriteArrayList<>();
 
     public DefaultProject(String name,
                           @Nullable ProjectInternal parent,
@@ -1042,7 +1045,35 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     public void afterEvaluate(Action<? super Project> action) {
         assertMutatingMethodAllowed("afterEvaluate(Action)");
         failAfterProjectIsEvaluated("afterEvaluate(Action)");
-        evaluationListener.add("afterEvaluate", getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action));
+        evaluationListener.add("afterEvaluate", ExceptionCapturingAction.from(getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
+    }
+
+    private static class ExceptionCapturingAction<T> implements Action<T> {
+
+        private final Action<T> delegate;
+
+
+        private ExceptionCapturingAction(Action<T> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void execute(final T arg) {
+            String classpathMode = System.getProperty("org.gradle.kotlin.dsl.provider.mode");
+            if(classpathMode != null && classpathMode.contains("classpath")) {
+                try {
+                    delegate.execute(arg);
+                } catch (Exception e) {
+                    exceptions.add(e);
+                }
+            } else {
+                delegate.execute(arg);
+            }
+        }
+
+        public static <T> ExceptionCapturingAction<T> from(Action<T> delegate) {
+            return new ExceptionCapturingAction<>(delegate);
+        }
     }
 
     @Override
@@ -1313,6 +1344,7 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
 
     @Inject
     protected abstract ScriptPluginFactory getScriptPluginFactory();
+
 
     @Inject
     protected abstract ScriptHandlerFactory getScriptHandlerFactory();

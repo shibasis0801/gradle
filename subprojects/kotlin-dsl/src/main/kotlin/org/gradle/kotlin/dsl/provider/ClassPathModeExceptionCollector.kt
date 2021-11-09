@@ -15,6 +15,7 @@
  */
 package org.gradle.kotlin.dsl.provider
 
+import org.gradle.api.internal.project.DefaultProject
 import org.gradle.internal.concurrent.Stoppable
 
 
@@ -24,13 +25,16 @@ open class ClassPathModeExceptionCollector : Stoppable {
     val collection = mutableListOf<Exception>()
 
     val exceptions: List<Exception>
-        get() = collection
+        get() {
+            return collection + DefaultProject.exceptions
+        }
 
     fun collect(error: Exception) {
         collection.add(error)
     }
 
     override fun stop() {
+        DefaultProject.exceptions.clear()
         collection.clear()
     }
 }
