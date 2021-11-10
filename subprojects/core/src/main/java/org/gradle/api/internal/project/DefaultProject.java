@@ -102,6 +102,7 @@ import org.gradle.internal.reflect.Instantiator;
 import org.gradle.internal.resource.TextUriResourceLoader;
 import org.gradle.internal.service.DefaultServiceRegistry;
 import org.gradle.internal.service.ServiceRegistry;
+import org.gradle.internal.service.scopes.ExceptionSuppressor;
 import org.gradle.internal.service.scopes.ServiceRegistryFactory;
 import org.gradle.internal.typeconversion.TypeConverter;
 import org.gradle.listener.ClosureBackedMethodInvocationDispatch;
@@ -214,8 +215,6 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     private String description;
 
     private boolean preparedForRuleBasedPlugins;
-
-    public static List<Exception> exceptions = new CopyOnWriteArrayList<>();
 
     public DefaultProject(String name,
                           @Nullable ProjectInternal parent,
@@ -1045,34 +1044,35 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     public void afterEvaluate(Action<? super Project> action) {
         assertMutatingMethodAllowed("afterEvaluate(Action)");
         failAfterProjectIsEvaluated("afterEvaluate(Action)");
-        evaluationListener.add("afterEvaluate", ExceptionCapturingAction.from(getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
+        ExceptionSuppressor exceptionSuppressor = getServices().get(ExceptionSuppressor.class);
+        if (exceptionSuppressor.isExceptionsSuppressed()) {
+            evaluationListener.add("afterEvaluate", ExceptionCapturingAction.from(exceptionSuppressor, getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
+        } else {
+            evaluationListener.add("afterEvaluate", getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action));
+        }
     }
 
     private static class ExceptionCapturingAction<T> implements Action<T> {
 
+        private final ExceptionSuppressor exceptionSuppressor;
         private final Action<T> delegate;
 
-
-        private ExceptionCapturingAction(Action<T> delegate) {
+        private ExceptionCapturingAction(ExceptionSuppressor exceptionSuppressor, Action<T> delegate) {
+            this.exceptionSuppressor = exceptionSuppressor;
             this.delegate = delegate;
         }
 
         @Override
         public void execute(final T arg) {
-            String classpathMode = System.getProperty("org.gradle.kotlin.dsl.provider.mode");
-            if(classpathMode != null && classpathMode.contains("classpath")) {
-                try {
-                    delegate.execute(arg);
-                } catch (Exception e) {
-                    exceptions.add(e);
-                }
-            } else {
+            try {
                 delegate.execute(arg);
+            } catch (Exception e) {
+                exceptionSuppressor.addException(e);
             }
         }
 
-        public static <T> ExceptionCapturingAction<T> from(Action<T> delegate) {
-            return new ExceptionCapturingAction<>(delegate);
+        public static <T> ExceptionCapturingAction<T> from(ExceptionSuppressor exceptionSuppressor, Action<T> delegate) {
+            return new ExceptionCapturingAction<>(exceptionSuppressor, delegate);
         }
     }
 

@@ -37,6 +37,7 @@ import org.gradle.internal.fingerprint.classpath.ClasspathFingerprinter
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.internal.operations.BuildOperationExecutor
 import org.gradle.internal.scripts.ScriptExecutionListener
+import org.gradle.internal.service.scopes.ExceptionSuppressor
 import org.gradle.kotlin.dsl.cache.KotlinDslWorkspaceProvider
 import org.gradle.kotlin.dsl.normalization.KotlinCompileClasspathFingerprinter
 import org.gradle.kotlin.dsl.support.EmbeddedKotlinProvider
@@ -81,8 +82,8 @@ object BuildServices {
         PluginRequestsHandler(pluginRequestApplicator, autoAppliedPluginHandler)
 
     @Suppress("unused")
-    fun createClassPathModeExceptionCollector() =
-        ClassPathModeExceptionCollector()
+    fun createClassPathModeExceptionCollector(suppressor: ExceptionSuppressor) =
+        ClassPathModeExceptionCollector(suppressor)
 
     @Suppress("unused")
     fun createKotlinScriptEvaluator(
