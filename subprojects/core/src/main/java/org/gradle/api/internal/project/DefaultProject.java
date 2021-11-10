@@ -143,7 +143,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonMap;
@@ -1045,6 +1044,10 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
         assertMutatingMethodAllowed("afterEvaluate(Action)");
         failAfterProjectIsEvaluated("afterEvaluate(Action)");
         ExceptionSuppressor exceptionSuppressor = getServices().get(ExceptionSuppressor.class);
+
+        // TODO (donat) we need to check the condition only once, not for every listener
+        // TODO (donat) apart from afterEvaluate were else we need suppress exceptions? (beforeEvaluate, all other before/after methods)
+        // TODO (donat) rename ListenerBuildOperationDecorator to ListenerDecorator and have two subclasses: ListenerBuildOperationDecorator and ListenerExceptionSuppressingDecorator
         if (exceptionSuppressor.isExceptionsSuppressed()) {
             evaluationListener.add("afterEvaluate", ExceptionCapturingAction.from(exceptionSuppressor, getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
         } else {
@@ -1052,6 +1055,7 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
         }
     }
 
+    // TODO (donat) can we avoid creating a new instance for every single action. Maybe getListenerSuppressWarningDecorator().decorate().
     private static class ExceptionCapturingAction<T> implements Action<T> {
 
         private final ExceptionSuppressor exceptionSuppressor;
@@ -1344,7 +1348,6 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
 
     @Inject
     protected abstract ScriptPluginFactory getScriptPluginFactory();
-
 
     @Inject
     protected abstract ScriptHandlerFactory getScriptHandlerFactory();

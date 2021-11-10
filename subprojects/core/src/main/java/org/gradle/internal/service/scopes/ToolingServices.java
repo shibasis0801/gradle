@@ -25,9 +25,11 @@ public class ToolingServices extends AbstractPluginServiceRegistry {
         registration.addProvider(new ExceptionServices());
     }
 
-    // TODO @VisibleForTesting (e.g. GradleUserHomeServices for testing)
+    // TODO (donat) @VisibleForTesting (e.g. GradleUserHomeServices for testing)
     static class ExceptionServices {
         public ExceptionSuppressor createExceptionSuppressor() {
+            // TODO (donat) is classpath is the only value to suppress warnings? there's lenient mode and strict-classpath
+            // TODO (doonat) should we push the calculation to the kotlin-dsl?
             String classpathMode = System.getProperty("org.gradle.kotlin.dsl.provider.mode");
             boolean expressionsSuppressed = classpathMode != null && classpathMode.contains("classpath");
             return new ExceptionSuppressor(expressionsSuppressed);

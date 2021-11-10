@@ -25,9 +25,7 @@ open class ClassPathModeExceptionCollector(val suppressor: ExceptionSuppressor) 
     val collection = mutableListOf<Exception>()
 
     val exceptions: List<Exception>
-        get() {
-            return collection + suppressor.exceptions
-        }
+        get() = collection + suppressor.exceptions
 
     fun collect(error: Exception) {
         collection.add(error)

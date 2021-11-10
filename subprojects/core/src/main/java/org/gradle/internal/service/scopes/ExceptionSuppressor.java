@@ -21,6 +21,8 @@ import org.gradle.internal.concurrent.Stoppable;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO (donat) name (maybe ExceptionCollector), javadoc
+// TODO (donat) add test coverage. How is ClassPathModeExceptionCollector tested?
 public class ExceptionSuppressor implements Stoppable {
 
     private final boolean exceptionsSuppressed;
@@ -35,6 +37,7 @@ public class ExceptionSuppressor implements Stoppable {
     }
 
     public void addException(Exception e) {
+        // TODO (donat) do we need to make it thread-safe? Or, can we just use CopyOnWriteArrayList?
         synchronized (exceptions) {
             exceptions.add(e);
         }
@@ -54,4 +57,6 @@ public class ExceptionSuppressor implements Stoppable {
             exceptions.clear();
         }
     }
+
+    // TODO (donat) add method similar to inline fun <T> ClassPathModeExceptionCollector.ignoringErrors(f: () -> T): T? =
 }
