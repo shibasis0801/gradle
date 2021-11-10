@@ -22,7 +22,6 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.internal.project.ProjectRegistry
 import org.gradle.configuration.internal.UserCodeApplicationContext
 import org.gradle.configurationcache.fingerprint.ConfigurationCacheFingerprintController
-import org.gradle.configurationcache.initialization.ConfigurationCacheBuildEnablement
 import org.gradle.configurationcache.initialization.ConfigurationCacheStartParameter
 import org.gradle.configurationcache.initialization.DefaultConfigurationCacheProblemsListener
 import org.gradle.configurationcache.initialization.DefaultInjectedClasspathInstrumentationStrategy
@@ -54,12 +53,10 @@ class ConfigurationCacheServices : AbstractPluginServiceRegistry() {
     override fun registerBuildTreeServices(registration: ServiceRegistration) {
         registration.run {
             add(BuildTreeListenerManager::class.java)
-            add(ConfigurationCacheStartParameter::class.java)
             add(DefaultInjectedClasspathInstrumentationStrategy::class.java)
             add(ConfigurationCacheKey::class.java)
             add(ConfigurationCacheReport::class.java)
             add(ConfigurationCacheProblems::class.java)
-            add(ConfigurationCacheClassLoaderScopeRegistryListener::class.java)
             add(DefaultConfigurationCacheProblemsListener::class.java)
             add(DefaultBuildModelControllerServices::class.java)
             add(DefaultBuildToolingModelControllerFactory::class.java)
@@ -71,7 +68,6 @@ class ConfigurationCacheServices : AbstractPluginServiceRegistry() {
 
     override fun registerBuildServices(registration: ServiceRegistration) {
         registration.run {
-            add(ConfigurationCacheBuildEnablement::class.java)
             add(ConfigurationCacheProblemsListenerManagerAction::class.java)
             add(RelevantProjectsRegistry::class.java)
             addProvider(BuildScopeServicesProvider())

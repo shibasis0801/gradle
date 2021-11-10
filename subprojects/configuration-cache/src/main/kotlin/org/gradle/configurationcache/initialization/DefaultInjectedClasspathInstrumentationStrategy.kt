@@ -21,18 +21,19 @@ import org.gradle.configurationcache.problems.ProblemsListener
 import org.gradle.configurationcache.problems.PropertyProblem
 import org.gradle.configurationcache.problems.PropertyTrace
 import org.gradle.configurationcache.problems.StructuredMessage
+import org.gradle.internal.buildtree.BuildModelParameters
 import org.gradle.internal.classpath.CachedClasspathTransformer
 import org.gradle.plugin.use.resolve.service.internal.InjectedClasspathInstrumentationStrategy
 import java.lang.management.ManagementFactory
 
 
 class DefaultInjectedClasspathInstrumentationStrategy(
-    private val startParameter: ConfigurationCacheStartParameter,
+    private val modelParameters: BuildModelParameters,
     private val problems: ProblemsListener
 ) : InjectedClasspathInstrumentationStrategy {
     override fun getTransform(): CachedClasspathTransformer.StandardTransform {
         val isAgentPresent = ManagementFactory.getRuntimeMXBean().inputArguments.find { it.startsWith("-javaagent:") } != null
-        return if (!startParameter.isEnabled && isAgentPresent) {
+        return if (!modelParameters.isConfigurationCache && isAgentPresent) {
             // Currently, the build logic instrumentation can interfere with Java agents, such as Jacoco
             // For now, disable the instrumentation
             CachedClasspathTransformer.StandardTransform.None

@@ -34,6 +34,8 @@ import org.gradle.configurationcache.build.ConfigurationCacheIncludedBuildState
 import org.gradle.configurationcache.build.NoOpBuildModelController
 import org.gradle.configurationcache.extensions.get
 import org.gradle.configurationcache.fingerprint.ConfigurationCacheFingerprintController
+import org.gradle.configurationcache.initialization.ConfigurationCacheBuildEnablement
+import org.gradle.configurationcache.initialization.ConfigurationCacheStartParameter
 import org.gradle.execution.DefaultTaskSchedulingPreparer
 import org.gradle.execution.ExcludedTaskFilteringProjectsPreparer
 import org.gradle.initialization.BuildCancellationToken
@@ -70,6 +72,7 @@ class DefaultBuildModelControllerServices(
                 registration.addProvider(VintageProjectServicesProvider())
             }
             if (buildModelParameters.isConfigurationCache) {
+                registration.add(ConfigurationCacheBuildEnablement::class.java)
                 registration.addProvider(ConfigurationCacheServicesProvider())
             } else {
                 registration.addProvider(VintageServicesProvider())
