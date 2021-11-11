@@ -82,8 +82,8 @@ object BuildServices {
         PluginRequestsHandler(pluginRequestApplicator, autoAppliedPluginHandler)
 
     @Suppress("unused")
-    fun createClassPathModeExceptionCollector(suppressor: ExceptionCollector) =
-        ClassPathModeExceptionCollector(suppressor)
+    fun createClassPathModeExceptionCollector(collector: ExceptionCollector) =
+        ClassPathModeExceptionCollector(collector)
 
     @Suppress("unused")
     fun createKotlinScriptEvaluator(
