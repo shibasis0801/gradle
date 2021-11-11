@@ -18,8 +18,9 @@ package org.gradle.internal.service.scopes;
 
 import org.gradle.internal.concurrent.Stoppable;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 // TODO (donat) add test coverage. How is ClassPathModeExceptionCollector tested?
 
@@ -29,7 +30,7 @@ import java.util.List;
 public class ExceptionCollector implements Stoppable {
 
     private final boolean exceptionsSuppressed;
-    private final List<Exception> exceptions = new ArrayList<>();
+    private final List<Exception> exceptions = new CopyOnWriteArrayList<>();
 
     ExceptionCollector(boolean exceptionsSuppressed) {
         this.exceptionsSuppressed = exceptionsSuppressed;
@@ -40,25 +41,16 @@ public class ExceptionCollector implements Stoppable {
     }
 
     public void addException(Exception e) {
-        // TODO (donat) do we need to make it thread-safe? Or, can we just use CopyOnWriteArrayList?
-        synchronized (exceptions) {
-            exceptions.add(e);
-        }
+        exceptions.add(e);
     }
 
     public List<Exception> getExceptions() {
-        List<Exception> result;
-        synchronized (exceptions) {
-            result = new ArrayList<>(exceptions);
-        }
-        return result;
+        return Collections.unmodifiableList(exceptions);
     }
 
     @Override
     public void stop() {
-        synchronized (exceptions) {
-            exceptions.clear();
-        }
+        exceptions.clear();
     }
 
     // TODO (donat) add method similar to inline fun <T> ClassPathModeExceptionCollector.ignoringErrors(f: () -> T): T? =
