@@ -16,9 +16,11 @@
 
 package org.gradle.internal.service.scopes;
 
+import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.internal.concurrent.Stoppable;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,10 +35,6 @@ public class ExceptionCollector implements Stoppable {
 
     ExceptionCollector(boolean exceptionsSuppressed) {
         this.exceptionsSuppressed = exceptionsSuppressed;
-    }
-
-    public boolean isExceptionsSuppressed() {
-        return exceptionsSuppressed;
     }
 
     public void addException(Exception e) {
@@ -54,9 +52,17 @@ public class ExceptionCollector implements Stoppable {
 
     public <T> Action<T> decorate(Action<T> action) {
         if (exceptionsSuppressed) {
-            return new ExceptionCollectingAction(action);
+            return new ExceptionCollectingAction<>(action);
         } else {
             return action;
+        }
+    }
+
+    public <T> Closure<T> decorate(Closure<T> closure) {
+        if (exceptionsSuppressed) {
+            return new ExceptionCollectingClosure<>(closure);
+        } else {
+            return closure;
         }
     }
 
@@ -75,6 +81,42 @@ public class ExceptionCollector implements Stoppable {
             } catch (Exception e) {
                 ExceptionCollector.this.addException(e);
             }
+        }
+    }
+
+    private class ExceptionCollectingClosure<T> extends Closure<T> {
+
+        private final Closure<T> delegate;
+
+        public ExceptionCollectingClosure(Closure<T> delegate) {
+            super(delegate.getOwner(), delegate.getThisObject());
+            this.delegate = delegate;
+        }
+
+        @SuppressWarnings("unused")
+        public void doCall(final Object... args) {
+            try {
+                int numClosureArgs = delegate.getMaximumNumberOfParameters();
+                Object[] finalArgs = numClosureArgs < args.length ? Arrays.copyOf(args, numClosureArgs) : args;
+                delegate.call(finalArgs);
+            } catch (Exception e) {
+                ExceptionCollector.this.addException(e);
+            }
+        }
+
+        @Override
+        public void setDelegate(Object delegateObject) {
+            delegate.setDelegate(delegateObject);
+        }
+
+        @Override
+        public void setResolveStrategy(int resolveStrategy) {
+            delegate.setResolveStrategy(resolveStrategy);
+        }
+
+        @Override
+        public int getMaximumNumberOfParameters() {
+            return delegate.getMaximumNumberOfParameters();
         }
     }
 }

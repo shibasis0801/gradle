@@ -1059,7 +1059,7 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     public void afterEvaluate(Closure closure) {
         assertMutatingMethodAllowed("afterEvaluate(Closure)");
         failAfterProjectIsEvaluated("afterEvaluate(Closure)");
-        evaluationListener.add(new ClosureBackedMethodInvocationDispatch("afterEvaluate", getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", Cast.<Closure<?>>uncheckedNonnullCast(closure))));
+        evaluationListener.add(new ClosureBackedMethodInvocationDispatch("afterEvaluate", exceptionCollector.decorate(getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", Cast.<Closure<?>>uncheckedNonnullCast(closure)))));
     }
 
     private void failAfterProjectIsEvaluated(String methodPrototype) {
