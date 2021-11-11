@@ -71,17 +71,22 @@ class DefaultBuildModelControllerServices(
             registration.add(BuildDefinition::class.java, buildDefinition)
             registration.add(BuildState::class.java, owner)
             registration.addProvider(ServicesProvider(buildDefinition, parentBuild, services))
-            if (buildModelParameters.isProjectScopeModelCache) {
-                registration.addProvider(CacheProjectServicesProvider())
-            } else {
-                registration.addProvider(VintageProjectServicesProvider())
-            }
             if (buildModelParameters.isConfigurationCache) {
                 registration.add(ConfigurationCacheBuildEnablement::class.java)
                 registration.add(ConfigurationCacheProblemsListenerManagerAction::class.java)
-                registration.addProvider(ConfigurationCacheServicesProvider())
+                registration.addProvider(ConfigurationCacheBuildControllerProvider())
             } else {
-                registration.addProvider(VintageServicesProvider())
+                registration.addProvider(VintageBuildControllerProvider())
+            }
+            if (buildModelParameters.isIsolatedProjects) {
+                registration.addProvider(ConfigurationCacheIsolatedProjectsProvider())
+            } else {
+                registration.addProvider(VintageIsolatedProjectsProvider())
+            }
+            if (buildModelParameters.isProjectScopeModelCache) {
+                registration.addProvider(ConfigurationCacheModelProvider())
+            } else {
+                registration.addProvider(VintageModelProvider())
             }
         }
     }
@@ -107,7 +112,7 @@ class DefaultBuildModelControllerServices(
     }
 
     private
-    class ConfigurationCacheServicesProvider {
+    class ConfigurationCacheBuildControllerProvider {
         fun createBuildModelController(
             build: BuildState,
             gradle: GradleInternal,
@@ -117,13 +122,13 @@ class DefaultBuildModelControllerServices(
             if (build is ConfigurationCacheIncludedBuildState) {
                 return NoOpBuildModelController(gradle)
             }
-            val vintageController = VintageServicesProvider().createBuildModelController(build, gradle, stateTransitionControllerFactory)
+            val vintageController = VintageBuildControllerProvider().createBuildModelController(build, gradle, stateTransitionControllerFactory)
             return ConfigurationCacheAwareBuildModelController(gradle, vintageController, cache)
         }
     }
 
     private
-    class VintageServicesProvider {
+    class VintageBuildControllerProvider {
         fun createBuildModelController(
             build: BuildState,
             gradle: GradleInternal,
@@ -141,16 +146,28 @@ class DefaultBuildModelControllerServices(
     }
 
     private
-    class CacheProjectServicesProvider {
+    class ConfigurationCacheIsolatedProjectsProvider {
         fun createCrossProjectModelAccess(
             projectRegistry: ProjectRegistry<ProjectInternal>,
             problemsListener: ProblemsListener,
             userCodeApplicationContext: UserCodeApplicationContext
         ): CrossProjectModelAccess {
-            val delegate = VintageProjectServicesProvider().createCrossProjectModelAccess(projectRegistry)
+            val delegate = VintageIsolatedProjectsProvider().createCrossProjectModelAccess(projectRegistry)
             return ProblemReportingCrossProjectModelAccess(delegate, problemsListener, userCodeApplicationContext)
         }
+    }
 
+    private
+    class VintageIsolatedProjectsProvider {
+        fun createCrossProjectModelAccess(
+            projectRegistry: ProjectRegistry<ProjectInternal>
+        ): CrossProjectModelAccess {
+            return DefaultCrossProjectModelAccess(projectRegistry)
+        }
+    }
+
+    private
+    class ConfigurationCacheModelProvider {
         fun createProjectEvaluator(
             buildOperationExecutor: BuildOperationExecutor,
             cachingServiceLocator: CachingServiceLocator,
@@ -158,7 +175,7 @@ class DefaultBuildModelControllerServices(
             fingerprintController: ConfigurationCacheFingerprintController,
             cancellationToken: BuildCancellationToken
         ): ProjectEvaluator {
-            val evaluator = VintageProjectServicesProvider().createProjectEvaluator(buildOperationExecutor, cachingServiceLocator, scriptPluginFactory, cancellationToken)
+            val evaluator = VintageModelProvider().createProjectEvaluator(buildOperationExecutor, cachingServiceLocator, scriptPluginFactory, cancellationToken)
             return ConfigurationCacheAwareProjectEvaluator(evaluator, fingerprintController)
         }
 
@@ -174,13 +191,7 @@ class DefaultBuildModelControllerServices(
     }
 
     private
-    class VintageProjectServicesProvider {
-        fun createCrossProjectModelAccess(
-            projectRegistry: ProjectRegistry<ProjectInternal>
-        ): CrossProjectModelAccess {
-            return DefaultCrossProjectModelAccess(projectRegistry)
-        }
-
+    class VintageModelProvider {
         fun createProjectEvaluator(
             buildOperationExecutor: BuildOperationExecutor,
             cachingServiceLocator: CachingServiceLocator,
