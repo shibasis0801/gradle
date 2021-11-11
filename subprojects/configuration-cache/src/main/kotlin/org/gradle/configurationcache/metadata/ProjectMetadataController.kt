@@ -16,38 +16,50 @@
 
 package org.gradle.configurationcache.metadata
 
-import org.gradle.cache.internal.streams.ValueStore
+import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleVersionIdentifier
+import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.internal.attributes.EmptySchema
+import org.gradle.configurationcache.ConfigurationCacheIO
 import org.gradle.configurationcache.ConfigurationCacheStateStore
+import org.gradle.configurationcache.DefaultConfigurationCache
 import org.gradle.configurationcache.StateType
+import org.gradle.configurationcache.models.ProjectStateStore
+import org.gradle.configurationcache.serialization.IsolateOwner
+import org.gradle.configurationcache.serialization.readNonNull
+import org.gradle.configurationcache.serialization.runReadOperation
+import org.gradle.configurationcache.serialization.runWriteOperation
+import org.gradle.internal.component.local.model.DefaultLocalComponentMetadata
 import org.gradle.internal.component.local.model.LocalComponentMetadata
-import org.gradle.internal.concurrent.CompositeStoppable
+import org.gradle.internal.serialize.Decoder
+import org.gradle.internal.serialize.Encoder
 import org.gradle.util.Path
-import java.io.Closeable
 
 
 internal
 class ProjectMetadataController(
-    private val store: ConfigurationCacheStateStore
-) : Closeable {
-    private
-    val metadataStore by lazy {
-        val writer = ValueStore.Writer<LocalComponentMetadata> { encoder, value ->
-            encoder.writeString(value.toString())
+    private val host: DefaultConfigurationCache.Host,
+    private val cacheIO: ConfigurationCacheIO,
+    store: ConfigurationCacheStateStore
+) : ProjectStateStore<Path, LocalComponentMetadata>(store, StateType.ProjectMetadata) {
+    override fun projectPathForKey(key: Path) = key
+
+    override fun write(encoder: Encoder, value: LocalComponentMetadata) {
+        val (context, codecs) = cacheIO.writerContextFor(encoder)
+        context.push(IsolateOwner.OwnerHost(host), codecs.userTypesCodec)
+        context.runWriteOperation {
+            write(value.id)
+            write(value.moduleVersionId)
         }
-        val reader = ValueStore.Reader<LocalComponentMetadata> {
-            TODO()
-        }
-        store.createValueStore(StateType.ProjectMetadata, writer, reader)
     }
 
-    fun loadOrCreateProjectMetadata(identityPath: Path, creator: () -> LocalComponentMetadata): LocalComponentMetadata {
-        println("-> load or create metadata for $identityPath")
-        val metadata = creator()
-        metadataStore.write(metadata)
-        return metadata
-    }
-
-    override fun close() {
-        CompositeStoppable.stoppable(metadataStore).stop()
+    override fun read(decoder: Decoder): LocalComponentMetadata {
+        val (context, codecs) = cacheIO.readerContextFor(decoder)
+        context.push(IsolateOwner.OwnerHost(host), codecs.userTypesCodec)
+        return context.runReadOperation {
+            val id = readNonNull<ComponentIdentifier>()
+            val moduleVersionId = readNonNull<ModuleVersionIdentifier>()
+            DefaultLocalComponentMetadata(moduleVersionId, id, Project.DEFAULT_STATUS, EmptySchema.INSTANCE)
+        }
     }
 }
