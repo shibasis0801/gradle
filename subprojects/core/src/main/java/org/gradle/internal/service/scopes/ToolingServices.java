@@ -25,10 +25,8 @@ public class ToolingServices extends AbstractPluginServiceRegistry {
         registration.addProvider(new ExceptionServices());
     }
 
-    // TODO (donat) @VisibleForTesting (e.g. GradleUserHomeServices for testing)
     static class ExceptionServices {
-        public ExceptionCollector createExceptionSuppressor() {
-            // TODO (donat) should we push the calculation to the kotlin-dsl?
+        public ExceptionCollector createExceptionCollector() {
             String classpathMode = System.getProperty("org.gradle.kotlin.dsl.provider.mode");
             boolean expressionsSuppressed = classpathMode != null && classpathMode.contains("classpath");
             return new ExceptionCollector(expressionsSuppressed);
