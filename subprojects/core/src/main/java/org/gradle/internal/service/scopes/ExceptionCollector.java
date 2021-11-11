@@ -21,14 +21,17 @@ import org.gradle.internal.concurrent.Stoppable;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO (donat) name (maybe ExceptionCollector), javadoc
 // TODO (donat) add test coverage. How is ClassPathModeExceptionCollector tested?
-public class ExceptionSuppressor implements Stoppable {
+
+/**
+ * Build service to suppress and collect exceptions for tooling purposes.
+ */
+public class ExceptionCollector implements Stoppable {
 
     private final boolean exceptionsSuppressed;
     private final List<Exception> exceptions = new ArrayList<>();
 
-    ExceptionSuppressor(boolean exceptionsSuppressed) {
+    ExceptionCollector(boolean exceptionsSuppressed) {
         this.exceptionsSuppressed = exceptionsSuppressed;
     }
 
