@@ -20,7 +20,6 @@ import static org.gradle.api.internal.artifacts.BaseRepositoryFactory.PLUGIN_POR
 import static org.gradle.integtests.fixtures.RepoScriptBlockUtil.gradlePluginRepositoryMirrorUrl
 
 class AbstractPluginIntegrationTest extends AbstractIntegrationSpec {
-    boolean usePluginRepoMirror = true
 
     def setup() {
         executer.beforeExecute {

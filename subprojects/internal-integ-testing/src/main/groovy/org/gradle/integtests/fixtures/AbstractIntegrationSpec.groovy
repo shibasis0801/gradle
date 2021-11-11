@@ -96,6 +96,7 @@ class AbstractIntegrationSpec extends Specification {
 
     protected int maxHttpRetries = 1
     protected Integer maxUploadAttempts
+    private boolean usePluginRepoMirror = true
 
     def setup() {
         // Verify that the previous test (or fixtures) has cleaned up state correctly
