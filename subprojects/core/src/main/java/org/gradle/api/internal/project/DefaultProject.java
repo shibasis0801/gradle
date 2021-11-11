@@ -199,6 +199,8 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
 
     private final TaskContainerInternal taskContainer;
 
+    private final ExceptionCollector exceptionCollector;
+
     private DependencyHandler dependencyHandler;
 
     private ConfigurationContainer configurationContainer;
@@ -245,6 +247,7 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
 
         services = serviceRegistryFactory.createFor(this);
         taskContainer = services.get(TaskContainerInternal.class);
+        exceptionCollector = services.get(ExceptionCollector.class);
 
         extensibleDynamicObject = new ExtensibleDynamicObject(this, Project.class, services.get(InstantiatorFactory.class).decorateLenient(services));
         if (parent != null) {
@@ -1043,7 +1046,6 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     public void afterEvaluate(Action<? super Project> action) {
         assertMutatingMethodAllowed("afterEvaluate(Action)");
         failAfterProjectIsEvaluated("afterEvaluate(Action)");
-        ExceptionCollector exceptionCollector = getServices().get(ExceptionCollector.class);
 
         // TODO (donat) we need to check the condition only once, not for every listener
         // TODO (donat) apart from afterEvaluate were else we need suppress exceptions? (beforeEvaluate, all other before/after methods)
