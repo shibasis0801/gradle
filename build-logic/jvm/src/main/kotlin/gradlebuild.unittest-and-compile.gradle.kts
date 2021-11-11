@@ -50,7 +50,7 @@ fun configureCompile() {
         languageVersion.set(JavaLanguageVersion.of(11))
         // Do not force AdoptOpenJDK vendor for M1 Macs
         if (!OperatingSystem.current().toString().contains("aarch64")) {
-            vendor.set(JvmVendorSpec.ADOPTOPENJDK)
+            vendor.set(JvmVendorSpec.ADOPTIUM)
         }
     }
 
