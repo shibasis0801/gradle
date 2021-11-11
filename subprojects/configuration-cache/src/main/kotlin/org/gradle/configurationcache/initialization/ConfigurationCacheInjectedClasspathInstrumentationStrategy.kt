@@ -21,34 +21,22 @@ import org.gradle.configurationcache.problems.ProblemsListener
 import org.gradle.configurationcache.problems.PropertyProblem
 import org.gradle.configurationcache.problems.PropertyTrace
 import org.gradle.configurationcache.problems.StructuredMessage
-import org.gradle.internal.buildtree.BuildModelParameters
 import org.gradle.internal.classpath.CachedClasspathTransformer
-import org.gradle.plugin.use.resolve.service.internal.InjectedClasspathInstrumentationStrategy
-import java.lang.management.ManagementFactory
 
 
 class ConfigurationCacheInjectedClasspathInstrumentationStrategy(
-    private val modelParameters: BuildModelParameters,
     private val problems: ProblemsListener
-) : InjectedClasspathInstrumentationStrategy {
-    override fun getTransform(): CachedClasspathTransformer.StandardTransform {
-        val isAgentPresent = ManagementFactory.getRuntimeMXBean().inputArguments.find { it.startsWith("-javaagent:") } != null
-        return if (!modelParameters.isConfigurationCache && isAgentPresent) {
-            // Currently, the build logic instrumentation can interfere with Java agents, such as Jacoco
-            // For now, disable the instrumentation
-            CachedClasspathTransformer.StandardTransform.None
-        } else if (isAgentPresent) {
-            problems.onProblem(
-                PropertyProblem(
-                    PropertyTrace.Gradle,
-                    StructuredMessage.build { text("support for using a Java agent with TestKit builds is not yet implemented with the configuration cache.") },
-                    null,
-                    DocumentationSection.NotYetImplementedTestKitJavaAgent
-                )
+) : AbstractInjectedClasspathInstrumentationStrategy() {
+    override fun whenAgentPresent(): CachedClasspathTransformer.StandardTransform {
+        // Report a problem and instrument anyway
+        problems.onProblem(
+            PropertyProblem(
+                PropertyTrace.Gradle,
+                StructuredMessage.build { text("support for using a Java agent with TestKit builds is not yet implemented with the configuration cache.") },
+                null,
+                DocumentationSection.NotYetImplementedTestKitJavaAgent
             )
-            CachedClasspathTransformer.StandardTransform.BuildLogic
-        } else {
-            CachedClasspathTransformer.StandardTransform.BuildLogic
-        }
+        )
+        return CachedClasspathTransformer.StandardTransform.BuildLogic
     }
 }

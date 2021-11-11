@@ -17,11 +17,11 @@
 package org.gradle.configurationcache.initialization
 
 import org.gradle.internal.classpath.CachedClasspathTransformer
-import org.gradle.plugin.use.resolve.service.internal.InjectedClasspathInstrumentationStrategy
 
 
-class VintageInjectedClasspathInstrumentationStrategy : InjectedClasspathInstrumentationStrategy {
-    override fun getTransform(): CachedClasspathTransformer.StandardTransform {
-        return CachedClasspathTransformer.StandardTransform.BuildLogic
+class VintageInjectedClasspathInstrumentationStrategy : AbstractInjectedClasspathInstrumentationStrategy() {
+    override fun whenAgentPresent(): CachedClasspathTransformer.StandardTransform {
+        // For now, disable the instrumentation
+        return CachedClasspathTransformer.StandardTransform.None
     }
 }
