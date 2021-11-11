@@ -35,7 +35,6 @@ class Gradleception(model: CIBuildModel, stage: Stage) : BaseGradleBuildType(sta
         script {
             name = "CALCULATE_DISTRIBUTION_MD5"
             scriptContent = """
-                #!/bin/sh
                 set -x
                 MD5=`find %teamcity.build.checkoutDir%/dogfood-first -type f | sort | xargs md5sum | md5sum | awk '{ print ${'$'}1 }'`
                 echo "##teamcity[setParameter name='env.ORG_GRADLE_PROJECT_versionQualifier' value='gradleception-${'$'}MD5']"
