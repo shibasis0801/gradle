@@ -27,7 +27,7 @@ import org.gradle.plugin.use.resolve.service.internal.InjectedClasspathInstrumen
 import java.lang.management.ManagementFactory
 
 
-class DefaultInjectedClasspathInstrumentationStrategy(
+class ConfigurationCacheInjectedClasspathInstrumentationStrategy(
     private val modelParameters: BuildModelParameters,
     private val problems: ProblemsListener
 ) : InjectedClasspathInstrumentationStrategy {

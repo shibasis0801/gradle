@@ -21,9 +21,14 @@ import org.gradle.api.internal.GradleInternal
 import org.gradle.api.internal.artifacts.ivyservice.projectmodule.DefaultLocalComponentRegistry
 import org.gradle.api.internal.artifacts.ivyservice.projectmodule.LocalComponentProvider
 import org.gradle.api.internal.artifacts.ivyservice.projectmodule.LocalComponentRegistry
+import org.gradle.api.internal.project.CrossProjectModelAccess
+import org.gradle.api.internal.project.DefaultCrossProjectModelAccess
+import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.api.internal.project.ProjectRegistry
 import org.gradle.api.internal.project.ProjectStateRegistry
 import org.gradle.configuration.ProjectsPreparer
 import org.gradle.configuration.ScriptPluginFactory
+import org.gradle.configuration.internal.UserCodeApplicationContext
 import org.gradle.configuration.project.BuildScriptProcessor
 import org.gradle.configuration.project.ConfigureActionsProjectEvaluator
 import org.gradle.configuration.project.DelayedConfigurationActions
@@ -35,7 +40,7 @@ import org.gradle.configurationcache.build.NoOpBuildModelController
 import org.gradle.configurationcache.extensions.get
 import org.gradle.configurationcache.fingerprint.ConfigurationCacheFingerprintController
 import org.gradle.configurationcache.initialization.ConfigurationCacheBuildEnablement
-import org.gradle.configurationcache.initialization.ConfigurationCacheStartParameter
+import org.gradle.configurationcache.problems.ProblemsListener
 import org.gradle.execution.DefaultTaskSchedulingPreparer
 import org.gradle.execution.ExcludedTaskFilteringProjectsPreparer
 import org.gradle.initialization.BuildCancellationToken
@@ -73,6 +78,7 @@ class DefaultBuildModelControllerServices(
             }
             if (buildModelParameters.isConfigurationCache) {
                 registration.add(ConfigurationCacheBuildEnablement::class.java)
+                registration.add(ConfigurationCacheProblemsListenerManagerAction::class.java)
                 registration.addProvider(ConfigurationCacheServicesProvider())
             } else {
                 registration.addProvider(VintageServicesProvider())
@@ -136,6 +142,15 @@ class DefaultBuildModelControllerServices(
 
     private
     class CacheProjectServicesProvider {
+        fun createCrossProjectModelAccess(
+            projectRegistry: ProjectRegistry<ProjectInternal>,
+            problemsListener: ProblemsListener,
+            userCodeApplicationContext: UserCodeApplicationContext
+        ): CrossProjectModelAccess {
+            val delegate = VintageProjectServicesProvider().createCrossProjectModelAccess(projectRegistry)
+            return ProblemReportingCrossProjectModelAccess(delegate, problemsListener, userCodeApplicationContext)
+        }
+
         fun createProjectEvaluator(
             buildOperationExecutor: BuildOperationExecutor,
             cachingServiceLocator: CachingServiceLocator,
@@ -160,6 +175,12 @@ class DefaultBuildModelControllerServices(
 
     private
     class VintageProjectServicesProvider {
+        fun createCrossProjectModelAccess(
+            projectRegistry: ProjectRegistry<ProjectInternal>
+        ): CrossProjectModelAccess {
+            return DefaultCrossProjectModelAccess(projectRegistry)
+        }
+
         fun createProjectEvaluator(
             buildOperationExecutor: BuildOperationExecutor,
             cachingServiceLocator: CachingServiceLocator,
