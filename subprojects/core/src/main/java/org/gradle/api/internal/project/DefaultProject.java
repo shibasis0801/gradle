@@ -1046,41 +1046,7 @@ public abstract class DefaultProject extends AbstractPluginAware implements Proj
     public void afterEvaluate(Action<? super Project> action) {
         assertMutatingMethodAllowed("afterEvaluate(Action)");
         failAfterProjectIsEvaluated("afterEvaluate(Action)");
-
-        // TODO (donat) we need to check the condition only once, not for every listener
-        // TODO (donat) apart from afterEvaluate were else we need suppress exceptions? (beforeEvaluate, all other before/after methods)
-        // TODO (donat) rename ListenerBuildOperationDecorator to ListenerDecorator and have two subclasses: ListenerBuildOperationDecorator and ListenerExceptionSuppressingDecorator
-
-        if (exceptionCollector.isExceptionsSuppressed()) { // TODO (donat) restore
-            evaluationListener.add("afterEvaluate", ExceptionCollectingAction.from(exceptionCollector, getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
-        } else {
-            evaluationListener.add("afterEvaluate", getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action));
-        }
-    }
-
-    // TODO (donat) can we avoid creating a new instance for every single action. Maybe getListenerSuppressWarningDecorator().decorate().
-    private static class ExceptionCollectingAction<T> implements Action<T> {
-
-        private final ExceptionCollector collector;
-        private final Action<T> delegate;
-
-        private ExceptionCollectingAction(ExceptionCollector collector, Action<T> delegate) {
-            this.collector = collector;
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void execute(final T arg) {
-            try {
-                delegate.execute(arg);
-            } catch (Exception e) {
-                collector.addException(e);
-            }
-        }
-
-        public static <T> ExceptionCollectingAction<T> from(ExceptionCollector collector, Action<T> delegate) {
-            return new ExceptionCollectingAction<>(collector, delegate);
-        }
+        evaluationListener.add("afterEvaluate", exceptionCollector.decorate(getListenerBuildOperationDecorator().decorate("Project.afterEvaluate", action)));
     }
 
     @Override

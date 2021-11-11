@@ -16,13 +16,12 @@
 
 package org.gradle.internal.service.scopes;
 
+import org.gradle.api.Action;
 import org.gradle.internal.concurrent.Stoppable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-// TODO (donat) add test coverage. How is ClassPathModeExceptionCollector tested?
 
 /**
  * Build service to suppress and collect exceptions for tooling purposes.
@@ -53,5 +52,29 @@ public class ExceptionCollector implements Stoppable {
         exceptions.clear();
     }
 
-    // TODO (donat) add method similar to inline fun <T> ClassPathModeExceptionCollector.ignoringErrors(f: () -> T): T? =
+    public <T> Action<T> decorate(Action<T> action) {
+        if (exceptionsSuppressed) {
+            return new ExceptionCollectingAction(action);
+        } else {
+            return action;
+        }
+    }
+
+    private class ExceptionCollectingAction<T> implements Action<T> {
+
+        private final Action<T> delegate;
+
+        private ExceptionCollectingAction(Action<T> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void execute(final T arg) {
+            try {
+                delegate.execute(arg);
+            } catch (Exception e) {
+                ExceptionCollector.this.addException(e);
+            }
+        }
+    }
 }
